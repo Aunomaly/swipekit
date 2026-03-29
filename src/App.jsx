@@ -4,6 +4,8 @@ import DesignReviewApp from "./components/design-review/DesignReviewApp";
 import SurveyApp from "./components/survey/SurveyApp";
 import DesignReviewerView from "./components/design-review/DesignReviewerView";
 import SurveyReviewerView from "./components/survey/SurveyReviewerView";
+import DesignSessionResults from "./components/design-review/DesignSessionResults";
+import SurveyResults from "./components/survey/SurveyResults";
 import Landing from "./components/Landing";
 
 export default function App() {
@@ -38,6 +40,8 @@ export default function App() {
         <Route path="/survey" element={<SurveyApp />} />
         <Route path="/r/:sessionId" element={<DesignReviewerView />} />
         <Route path="/s/:surveyId" element={<SurveyReviewerView />} />
+        <Route path="/results/r/:sessionId" element={<DesignSessionResults />} />
+        <Route path="/results/s/:surveyId" element={<SurveyResults />} />
       </Routes>
     </div>
   );

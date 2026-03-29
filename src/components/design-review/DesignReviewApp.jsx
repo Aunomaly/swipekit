@@ -46,13 +46,18 @@ export default function DesignReviewApp() {
     }
   };
 
+  const [resultsUrl, setResultsUrl] = useState("");
+  const [copiedResults, setCopiedResults] = useState(false);
+
   const generateLink = async () => {
     setGenerating(true);
     try {
       const sessionId = await createSession(designs);
       const url = `${window.location.origin}/r/${sessionId}`;
+      const rUrl = `${window.location.origin}/results/r/${sessionId}`;
       setShareId(sessionId);
       setShareUrl(url);
+      setResultsUrl(rUrl);
       setView("share");
     } catch (err) {
       console.error("Failed to create session:", err);
@@ -88,11 +93,18 @@ export default function DesignReviewApp() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const copyResultsLink = () => {
+    navigator.clipboard?.writeText(resultsUrl).catch(() => {});
+    setCopiedResults(true);
+    setTimeout(() => setCopiedResults(false), 2000);
+  };
+
   const reset = () => {
     setView("home");
     setDesigns([]);
     setShareId("");
     setShareUrl("");
+    setResultsUrl("");
     setCurrentIndex(0);
     setResults([]);
   };
@@ -173,12 +185,29 @@ export default function DesignReviewApp() {
           <div style={{ width: 72, height: 72, borderRadius: 20, background: "linear-gradient(135deg,rgba(74,230,138,.15),rgba(74,230,138,.05))", border: "1px solid rgba(74,230,138,.2)", display: "flex", alignItems: "center", justifyContent: "center", color: C.green, fontSize: 34 }}>✓</div>
           <div style={{ fontFamily: FS, fontSize: 28, color: C.white, textAlign: "center" }}>Ready to Share</div>
           <p style={{ color: C.dim, fontSize: 14, textAlign: "center", margin: 0, lineHeight: 1.6 }}>{designs.length} design{designs.length > 1 ? "s" : ""} uploaded.</p>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", maxWidth: 380, padding: "14px 18px", borderRadius: 14, background: "rgba(255,255,255,.04)", border: `1px solid ${C.border}` }}>
-            <span style={{ flex: 1, color: "rgba(255,255,255,.7)", fontSize: 14, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shareUrl}</span>
-            <button onClick={copyLink} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "none", background: copied ? "rgba(74,230,138,.15)" : "rgba(167,139,250,.15)", color: copied ? C.green : C.purple, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
-              {copied ? <><IconCheck /> Copied</> : <><IconCopy /> Copy</>}
-            </button>
+
+          {/* reviewer link */}
+          <div style={{ width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ color: "rgba(255,255,255,.3)", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".08em", fontFamily: F }}>Reviewer link — share this</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 18px", borderRadius: 14, background: "rgba(255,255,255,.04)", border: `1px solid ${C.border}` }}>
+              <span style={{ flex: 1, color: "rgba(255,255,255,.7)", fontSize: 14, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shareUrl}</span>
+              <button onClick={copyLink} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "none", background: copied ? "rgba(74,230,138,.15)" : "rgba(167,139,250,.15)", color: copied ? C.green : C.purple, cursor: "pointer", fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
+                {copied ? <><IconCheck /> Copied</> : <><IconCopy /> Copy</>}
+              </button>
+            </div>
           </div>
+
+          {/* results link */}
+          <div style={{ width: "100%", maxWidth: 380, display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ color: "rgba(255,255,255,.3)", fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".08em", fontFamily: F }}>Results link — keep for yourself</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 18px", borderRadius: 14, background: "rgba(167,139,250,.04)", border: "1px solid rgba(167,139,250,.15)" }}>
+              <span style={{ flex: 1, color: "rgba(255,255,255,.5)", fontSize: 14, fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{resultsUrl}</span>
+              <button onClick={copyResultsLink} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 10, border: "none", background: copiedResults ? "rgba(74,230,138,.15)" : "rgba(167,139,250,.15)", color: copiedResults ? C.green : C.purple, cursor: "pointer", fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
+                {copiedResults ? <><IconCheck /> Copied</> : <><IconCopy /> Copy</>}
+              </button>
+            </div>
+          </div>
+
           <div style={{ display: "flex", gap: 12, width: "100%", maxWidth: 380 }}>
             <button onClick={() => startReview(false)} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: `linear-gradient(135deg,${C.purple},${C.purpleDark})`, color: C.white, fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Preview as Reviewer</button>
             <button onClick={reset} style={{ padding: "14px 20px", borderRadius: 14, border: "1px solid rgba(255,255,255,.1)", background: "transparent", color: "rgba(255,255,255,.6)", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>Done</button>

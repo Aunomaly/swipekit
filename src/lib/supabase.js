@@ -62,6 +62,16 @@ export async function loadSessionReviews(sessionId) {
   return data;
 }
 
+export async function loadSessionResults(sessionId) {
+  const [{ data: designs, error: dErr }, { data: reviews, error: rErr }] = await Promise.all([
+    supabase.from("session_designs").select("*").eq("session_id", sessionId).order("position"),
+    supabase.from("design_reviews").select("*").eq("session_id", sessionId).order("created_at"),
+  ]);
+  if (dErr) throw dErr;
+  if (rErr) throw rErr;
+  return { designs, reviews };
+}
+
 // ── Image upload ─────────────────────────────────────────────────────────────
 
 export async function uploadDesignImage(file) {
@@ -117,4 +127,14 @@ export async function saveResponse({ surveyId, questionId, answer, reviewerName 
     reviewer_name: reviewerName ?? null,
   });
   if (error) throw error;
+}
+
+export async function loadSurveyResults(surveyId) {
+  const [{ data: questions, error: qErr }, { data: responses, error: rErr }] = await Promise.all([
+    supabase.from("survey_questions").select("*").eq("survey_id", surveyId).order("position"),
+    supabase.from("survey_responses").select("*").eq("survey_id", surveyId).order("created_at"),
+  ]);
+  if (qErr) throw qErr;
+  if (rErr) throw rErr;
+  return { questions, responses };
 }
