@@ -5,12 +5,80 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
+// ── Auth helpers ─────────────────────────────────────────────────────────────
+
+export async function signUpWithEmail(email, password) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithEmail(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithMagicLink(email) {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin },
+  });
+  if (error) throw error;
+}
+
+export async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: window.location.origin },
+  });
+  if (error) throw error;
+}
+
+export async function signOut() {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+}
+
+// ── Dashboard queries ─────────────────────────────────────────────────────────
+
+export async function loadUserSessions() {
+  const { data, error } = await supabase
+    .from("design_sessions")
+    .select("id, created_at, session_designs(id, url, name, position), design_reviews(id)")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data.map((s) => ({
+    id: s.id,
+    createdAt: s.created_at,
+    designs: (s.session_designs || []).sort((a, b) => a.position - b.position),
+    reviewCount: (s.design_reviews || []).length,
+  }));
+}
+
+export async function loadUserSurveys() {
+  const { data, error } = await supabase
+    .from("surveys")
+    .select("id, created_at, survey_questions(id, text, emoji, position), survey_responses(id)")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data.map((s) => ({
+    id: s.id,
+    createdAt: s.created_at,
+    questions: (s.survey_questions || []).sort((a, b) => a.position - b.position),
+    responseCount: (s.survey_responses || []).length,
+  }));
+}
+
 // ── Design sessions ──────────────────────────────────────────────────────────
 
 export async function createSession(designs) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data: session, error: sessionErr } = await supabase
     .from("design_sessions")
-    .insert({})
+    .insert({ user_id: user.id })
     .select()
     .single();
   if (sessionErr) throw sessionErr;
@@ -89,9 +157,12 @@ export async function uploadDesignImage(file) {
 // ── Surveys ──────────────────────────────────────────────────────────────────
 
 export async function createSurvey(questions) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
   const { data: survey, error: surveyErr } = await supabase
     .from("surveys")
-    .insert({})
+    .insert({ user_id: user.id })
     .select()
     .single();
   if (surveyErr) throw surveyErr;

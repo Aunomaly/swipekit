@@ -1,8 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { C, F, FS } from "./shared";
+import { useAuth } from "../lib/AuthContext";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  if (!loading && user) return <Navigate to="/dashboard" replace />;
 
   return (
     <div
@@ -39,7 +43,7 @@ export default function Landing() {
       {/* demo cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 400 }}>
         <button
-          onClick={() => navigate("/design")}
+          onClick={() => navigate("/login")}
           style={{
             display: "flex", alignItems: "center", gap: 20, padding: "24px 24px",
             borderRadius: 20, border: "1px solid rgba(255,255,255,0.06)",
@@ -58,7 +62,7 @@ export default function Landing() {
         </button>
 
         <button
-          onClick={() => navigate("/survey")}
+          onClick={() => navigate("/login")}
           style={{
             display: "flex", alignItems: "center", gap: 20, padding: "24px 24px",
             borderRadius: 20, border: "1px solid rgba(255,255,255,0.06)",

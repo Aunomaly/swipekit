@@ -1,12 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-import { C, F, FS } from "./components/shared";
+import { C, F } from "./components/shared";
+import AuthGuard from "./components/auth/AuthGuard";
+import AuthPage from "./components/auth/AuthPage";
+import NavBar from "./components/NavBar";
+import Landing from "./components/Landing";
+import Dashboard from "./components/Dashboard";
 import DesignReviewApp from "./components/design-review/DesignReviewApp";
 import SurveyApp from "./components/survey/SurveyApp";
 import DesignReviewerView from "./components/design-review/DesignReviewerView";
 import SurveyReviewerView from "./components/survey/SurveyReviewerView";
 import DesignSessionResults from "./components/design-review/DesignSessionResults";
 import SurveyResults from "./components/survey/SurveyResults";
-import Landing from "./components/Landing";
 
 export default function App() {
   return (
@@ -34,14 +38,22 @@ export default function App() {
           pointerEvents: "none",
         }}
       />
+
+      <NavBar />
+
       <Routes>
+        {/* public */}
         <Route path="/" element={<Landing />} />
-        <Route path="/design" element={<DesignReviewApp />} />
-        <Route path="/survey" element={<SurveyApp />} />
+        <Route path="/login" element={<AuthPage />} />
         <Route path="/r/:sessionId" element={<DesignReviewerView />} />
         <Route path="/s/:surveyId" element={<SurveyReviewerView />} />
-        <Route path="/results/r/:sessionId" element={<DesignSessionResults />} />
-        <Route path="/results/s/:surveyId" element={<SurveyResults />} />
+
+        {/* protected — creator only */}
+        <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+        <Route path="/design" element={<AuthGuard><DesignReviewApp /></AuthGuard>} />
+        <Route path="/survey" element={<AuthGuard><SurveyApp /></AuthGuard>} />
+        <Route path="/results/r/:sessionId" element={<AuthGuard><DesignSessionResults /></AuthGuard>} />
+        <Route path="/results/s/:surveyId" element={<AuthGuard><SurveyResults /></AuthGuard>} />
       </Routes>
     </div>
   );
