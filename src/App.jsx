@@ -48,10 +48,12 @@ export default function App() {
         <Route path="/r/:sessionId" element={<DesignReviewerView />} />
         <Route path="/s/:surveyId" element={<SurveyReviewerView />} />
 
+        {/* demo flows — public, auth only required to generate a share link */}
+        <Route path="/design" element={<DesignReviewApp />} />
+        <Route path="/survey" element={<SurveyApp />} />
+
         {/* protected — creator only */}
         <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
-        <Route path="/design" element={<AuthGuard><DesignReviewApp /></AuthGuard>} />
-        <Route path="/survey" element={<AuthGuard><SurveyApp /></AuthGuard>} />
         <Route path="/results/r/:sessionId" element={<AuthGuard><DesignSessionResults /></AuthGuard>} />
         <Route path="/results/s/:surveyId" element={<AuthGuard><SurveyResults /></AuthGuard>} />
       </Routes>

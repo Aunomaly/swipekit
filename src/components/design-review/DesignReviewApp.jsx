@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { C, F, FS, uid, SAMPLE_DESIGNS } from "../shared";
 import { IconBack, IconCheck, IconCopy, IconHeart, IconPen, IconUpload, IconX } from "../shared";
 import { createSession, uploadDesignImage } from "../../lib/supabase";
+import { useAuth } from "../../lib/AuthContext";
 import DesignSwipeCard from "./DesignSwipeCard";
 import AnnotationOverlay from "./AnnotationOverlay";
 import DesignResults from "./DesignResults";
 
 export default function DesignReviewApp() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const [view, setView] = useState("home");
   const [designs, setDesigns] = useState([]);
   const [shareId, setShareId] = useState("");
@@ -50,6 +53,10 @@ export default function DesignReviewApp() {
   const [copiedResults, setCopiedResults] = useState(false);
 
   const generateLink = async () => {
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     setGenerating(true);
     try {
       const sessionId = await createSession(designs);

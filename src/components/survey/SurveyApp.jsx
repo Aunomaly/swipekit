@@ -1,12 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { C, F, FS, uid, DEMO_QUESTIONS, Q_EMOJIS } from "../shared";
 import { IconBack, IconCheck, IconCopy, IconHeart, IconPlus, IconTrash, IconX } from "../shared";
 import { createSurvey } from "../../lib/supabase";
+import { useAuth } from "../../lib/AuthContext";
 import SurveySwipeCard from "./SurveySwipeCard";
 
 export default function SurveyApp() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
   const [view, setView] = useState("home");
   const [questions, setQuestions] = useState([]);
   const [newQ, setNewQ] = useState("");
@@ -27,6 +30,10 @@ export default function SurveyApp() {
   const removeQuestion = (id) => setQuestions((prev) => prev.filter((q) => q.id !== id));
 
   const generateLink = async () => {
+    if (!user) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     setGenerating(true);
     try {
       const surveyId = await createSurvey(questions);
